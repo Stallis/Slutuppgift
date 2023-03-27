@@ -1,0 +1,64 @@
+import java.util.Random;
+
+public class BingoCard {
+    private int[][] card;
+    private boolean[][] called;
+
+    public BingoCard() {
+        card = new int[5][5];
+        called = new boolean[5][5];
+        fillCard();
+    }
+
+    private void fillCard() {
+        Random rand = new Random();
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
+                if (i == 2 && j == 2) {
+                    card[i][j] = -1;
+                } else {
+                    int num = rand.nextInt(100) + 1;
+                    card[i][j] = num;
+                }
+                called[i][j] = false;
+            }
+        }
+    }
+
+    public boolean checkNumber(int num) {
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
+                if (card[i][j] == num) {
+                    called[i][j] = true;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean checkBingo() {
+        boolean row, col, diag1, diag2;
+        for (int i = 0; i < 5; i++) {
+            row = true;
+            col = true;
+            for (int j = 0; j < 5; j++) {
+                row &= called[i][j];
+                col &= called[j][i];
+            }
+            if (row || col) {
+                return true;
+            }
+        }
+        diag1 = true;
+        diag2 = true;
+        for (int i = 0; i < 5; i++) {
+            diag1 &= called[i][i];
+            diag2 &= called[i][4-i];
+        }
+        if (diag1 || diag2) {
+            return true;
+        }
+        return false;
+    }
+}
