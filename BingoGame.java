@@ -1,6 +1,9 @@
 public class BingoGame {
+    
     public static void main(String[] args){
+        
         new BingoGUI();
+        
     }
 }
 

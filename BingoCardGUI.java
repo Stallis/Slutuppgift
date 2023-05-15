@@ -1,330 +1,119 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
- 
+
+
 class BingoCard {
-    private int [][] card = new int[5][5];
-    private Random gen = new Random();
+    public static int BINGO_col = 5;                                              //DEBUG: FIXED För BINGO är detta värde alltid 5. Public så att man kan nå denna data från alla funktioner
+    public static int max_row = 5;                                                //DEBUG: Anger antalet rader i spelet, ex max_row x BINGO_col = högsta talet i spelet (5 x 5 = 25). Public så att man kan nå denna data från alla funktioner
+    public int[][] card = new int[BINGO_col][max_row];                     //Ny 2d array deklareras, storlek 5x5
+    public int[][] displcard = new int[BINGO_col][max_row];                     //Ny 2d array deklareras, storlek 5x5
 
-    //Constructor populate bingo card
-    public BingoCard() {
-        ArrayList <Integer> possValues = new ArrayList<>();
-        int start = 1;
+    private Random gen = new Random();                                      //Ny slump variabel deklareras, "gen"
+    
 
-        //Iterate the 2d array (up ad down)
-        for (int col = 0; col < card[0].length; col++) {
-            fillArray(possValues, start);
-            for (int row = 0; row < card.length; row++) {
-                int position = gen.nextInt(possValues.size());
-                card[row][col] = possValues.get(position);
-                possValues.remove(position);
-            }//Ends inner loop
-            start += 25;
-        }//Ends outer loop
+    // Constructor populate bingo card
+    public BingoCard() {                                                    //Publik metod
+        ArrayList<Integer> possValues = new ArrayList<>();                  //En ny arraylista med int deklareras, "possValues"
+        int start = 1;                                                      //Int-variabel "start" deklareras till 1
 
-        //Set free space
-        card [2][2] = 0;
+        // Iterate the 2d array (up and down)                               //Vävd for-loop för att skapa kortet uppifrån och ned
+        for (int col = 0; col < card[0].length; col++) {                    //Börjar på col=0, col<5, förflytta till col++, dvs gör uppifrån och ned i varje kolumn 
+            fillArray(possValues, start);                                   //Fyller kort med den tomma array-listan
+            for (int row = 0; row < card.length; row++) {                   //Samma process fast för row, dvs går över alla rader i kortet
+                int position = gen.nextInt(possValues.size());              // Slumpar positions index i possValues Motsvarighet till shuffel
+                                                                           //Markerar positionen för varje  ruta. Därefter används nextInt för att hämta en slumpvariabel,        
+                 
+                card[row][col] = possValues.get(position);                  //dvs "gen" till varje ruta som sedan lagras i array-listan "possvalues".
+                displcard[row][col] = card[row][col];
+                possValues.remove(position);                                // Tar sedan kortets gränser/storlek och lagrar det för "possvalues" positions-variabel
+            } // Ends inner loop                                            //Positionen tas bort från possValues-listan för att undvika att samma värde placeras på flera positioner i samma kolumn och därmed upprepas på kortet.
+            start += max_row;
+        } // Ends outer loop
 
-    }//Constructor
+        // Set free space
+        //card[2][2] = 0;                                                   //DEBUG Tror denna rad skall bort
 
-    //Fills array with all possible values
-    private void fillArray(ArrayList<Integer> possValues, int start){
+    }// Constructor
+
+    // Fills array with all possible values
+    private void fillArray(ArrayList<Integer> possValues, int start) {
         possValues.clear();
-        for (int i = start; i < start + 25; i++) {
-            possValues.add(i);
+        for (int i = start; i <= (start + max_row - 1); i++) {              // DEBUG: ändrar från 24 till max_row som är 5 vilket säkerställer att kolumnen endast innehåller tillåtna värden B:1-5, I:6-10;N:11-15, G:16-20, O:21-25
+            if (i <= start + max_row - 1) {
+                possValues.add(i);
+                
+            }
         }
-    }//End fillArray
-
-    //Used to display card values
-    public String toString(){
-        String str = "B\tN\tN\tG\tO\n";
-
-        for (int row = 0; row < card.length; row++) {
-            for (int col = 0; col < card[0].length; col++) {
-                if (card[row][col] > 0) {
-                    str += card[row][col] + "\t";
-                } else {
-                    str += "X\t";
-
-                }//End else
-            }//End innner loop
-            str += "\n";
-        }//End outer loop
-
-        return str;
-    }
-  
-}//Ends class
-
- 
+    }// End fillArray
 
 
+   
+ //Denna funktion tar emot de dragna talen i num och letar upp talet i card och ersätter med en nolla för det dragna talet
+ public void move(int num) {
+    //System.out.println("test");
+    for (int row = 0; row < card.length; row++) {
+        for (int col = 0; col < card[0].length; col++) {
+            if (card[row][col] == num) {
+                card[row][col] = 0;
+                 
+            }//ends if
+        }//ends inner loop
+     }//end outer loop
 
+  }//ends move
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
- //Replace entered number in the 
-    public void move(int num) {
-        for (int row = 0; row < card.length; row++) {
-            for (int col = 0; col < card[0].length; col++) {
-                if (card[row][col] == num) {
-                    card[row][col] = 0;
-                }//ends if  
-            }//ends inner loop
-        }//end outer loop
-    }//ends move
-    
-    
-    public boolean ifWon() {
-        int sumAcross = 0;
-        int sumDown = 0;
-        int diaRight = 0;
-        int diaLeft = 0;
-
-        for(int row = 0; row < card.length; row++) {
-            for(int col = 0; col < card[0].length; col++) {
-                sumAcross += card[row][col];
-                sumDown += card[col][row];
-            }//Ends inner loop
-            diaRight += card[row][row];
-            diaLeft += card [row][4-row];
-        //Check to see if those are zero
-        if (sumAcross == 0 || sumDown == 0){
-            return true;
-        }    
-        sumAcross = 0;
-        sumDown = 0; 
+ // if won letar efter en vågrät rad som innehåller endast nollor dvs om sumacross = noll så har vi en vågrät rad med nollor dvs BINGO. OBS här skunde man ha haft en funktion som testar med X men då måste man kolla att det är 5 st X
+  public boolean ifWon() {
+    int sumAcross = 0;
+    boolean win = false;
+    for(int row = 0; row < card.length; row++) 
+    {
+      for(int col = 0; col < card[0].length; col++) 
+        {
+          sumAcross += card[row][col];
+        }
+      if (sumAcross == 0) 
+        {   
+        win = true; 
+        break;                                                                 //DEBUG: Letar endast vågräta rader med 0:or
+        }
+        else 
+        {
+            win = false;
+        }//Ends inner loop   
+      sumAcross = 0;
     }//Ends outter loop
-    if(diaRight || diaLeft == 0){
-        return true; 
-    }
-}//Ends isWin */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* 
-    private JFrame frame;
-    private JPanel panel;
-    private ArrayList<JLabel> labels;
-
-   public BingoCardGUI() {
-        ArrayList<Integer> bingoCard = new ArrayList<>();
-        Random rand = new Random();
-        for (int i = 1; i <= 75; i++) {
-            bingoCard.add(i);
-        }
-        for (int i = bingoCard.size() - 1; i > 0; i--) {
-            int index = rand.nextInt(i + 1);
-            int temp = bingoCard.get(index);
-            bingoCard.set(index, bingoCard.get(i));
-            bingoCard.set(i, temp);
-        }
-        ArrayList<Integer> result = new ArrayList<>(bingoCard.subList(0, 25));
-
-        frame = new JFrame("Bingo Card");
-        panel = new JPanel();
-        labels = new ArrayList<>();
-        for (Integer num : result) {
-            labels.add(new JLabel(String.valueOf(num)));
-        }
-        panel.setLayout(new GridLayout(5, 5));
-        for (JLabel label : labels) {
-            panel.add(label);
-        }
-        frame.add(panel);
-        frame.setSize(400, 400);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-
+    //Check to see if those are zero
+    // if (sumAcross == 0 || sumDown == 0){                                    //DEBUG: Letar vågräta eller rader med 0:or
+   
+    return win;
+  }//Ends ifWon
+
+
+// Denna funktion ser till att ta bort nollorna i card och ersätta med nya nummer dvs ett nytt spel startar
+    public void reset () {
+        ArrayList<Integer> possValues2 = new ArrayList<>();                  //En ny arraylista med int deklareras, "possValues"
+        
+        int start = 1;                                                      //Int-variabel "start" deklareras till 1
+
+        // Iterate the 2d array (up and down)                               //Vävd for-loop för att skapa kortet uppifrån och ned
+        for (int col = 0; col < card[0].length; col++) {                    //Börjar på col=0, col<5, förflytta till col++, dvs gör uppifrån och ned i varje kolumn 
+            fillArray(possValues2, start);                                   //Fyller kort med den tomma array-listan
+            for (int row = 0; row < card.length; row++) {                   //Samma process fast för row, dvs går över alla rader i kortet
+                int position = gen.nextInt(possValues2.size());              // Slumpar positions index i possValues Motsvarighet till shuffel
+                                                                           //Markerar positionen för varje  ruta. Därefter används nextInt för att hämta en slumpvariabel,        
+                 
+                card[row][col] = possValues2.get(position);                  //dvs "gen" till varje ruta som sedan lagras i array-listan "possvalues".
+                displcard[row][col] = card[row][col];
+                possValues2.remove(position);                                // Tar sedan kortets gränser/storlek och lagrar det för "possvalues" positions-variabel
+            } // Ends inner loop                                            //Positionen tas bort från possValues-listan för att undvika att samma värde placeras på flera positioner i samma kolumn och därmed upprepas på kortet.
+            start += max_row;
+        } // Ends outer loop
     }
 
-  public static void main(String[] args) {
-        new BingoCardGUI();
-    }
-
-
-
-
-
-
-
-Random rand = new Random();
-int[][] randomNumbers = new int[5][5];  
-
-System.out.println(" _______________________________________ ");
-System.out.println("|B\t|I\t|N\t|G\t|O\t|");
-System.out.println("|---------------------------------------|");
-
-for(int i = 0; i < randomNumbers.length; i++) {
-    for(int j = 0; j <randomNumbers.length; j++) {
-        randomNumbers[i][j] = rand.nextInt(75);
-        //print array
-        System.out.print("|" + randomNumbers[i][j] + "\t");
-     }
-     if (i == 4){
-        System.out.println("|\n|_______|_______|_______|_______|_______|");
-     } else {
-        System.out.println("|\n|---------------------------------------|");
-     }   
- }
-*/  
-
-
-        
-
-     
-     
-    
- /*Font h1Font = new Font("BadMofo", Font.PLAIN, 28);
-        Font BadMofo;
-
-        try {
-        BadMofo = Font.createFont(Font.TRUETYPE_FONT, new File("BadMofo.ttf"));
-        GrapicsEnviroment ge = Graphi
-        }
-        catch (IOException | FontFormatException e)
-        {*/
-
-           
-         
-         /*Ikon
-         ImageIcon image = new ImageIcon("Java logo image.jpg");
-         frame.setIconImage(image.getImage());*/
-         
-  
-    
-     
-      /*   
-      //Instance
-        JLabel h1 = new JLabel();
-        h1.setText("BINGO");
-        h1.setFont(new Font("Arial",Font.PLAIN,20));
-
-        JFrame frame = new JFrame();
-        frame.setTitle("Bingo");
-        frame.setLayout(null);
-
-        ImageIcon logo = new ImageIcon("logo.jpg");
-        frame.setIconImage(logo.getImage());
-
-        Border redBorder = BorderFactory.createLineBorder(Color.red,3);
-
-        JPanel h1Panel = new JPanel();
-        //h1Panel.setBackground(Color.red);
-        h1Panel.setBorder(redBorder);
-        h1Panel.setBounds(250, 250, 450, 250);
-        //h1Panel.setBackground(new Color(0,68,129));
-        frame.add(h1Panel);
-
-        //Label "h1" (Settings)
-        frame.add(h1);
-        
-       
-         //Settings
-         frame.getContentPane().setBackground(new Color(0,68,129));
-         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-         frame.setVisible(true); 
-         
-         //Margins
-         frame.setSize(1000,500);
-         
-          */
-
-
-         
-        
-       
-      
 
  
+}// Ends class
+
+
